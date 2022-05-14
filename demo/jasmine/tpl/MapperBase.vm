@@ -4,7 +4,7 @@ ${rawName.substring(0,1).toLowerCase()}${rawName.substring(1)}##
 #end
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="${model.repoPkg}.${model.table.className}Repository">
+<mapper namespace="${model.repoPkg}.${model.table.className}MapperBase">
     <sql id="TableName">
         ${model.table.name}
     </sql>
@@ -183,42 +183,4 @@ ${rawName.substring(0,1).toLowerCase()}${rawName.substring(1)}##
             and `${model.versionColumn.name}` = #{#name(${model.table.className}).${model.versionColumn.fieldName},jdbcType=${model.versionColumn.jdbcType}}
 #end
     </update>
-
-    <sql id="page_select_sql">
-#foreach($column in $model.table.columns)##
-        <if test="#name(${model.table.className}).${column.fieldName} != null">
-            and `${column.name}` = #{#name(${model.table.className}).${column.fieldName},jdbcType=${column.jdbcType}}
-        </if>
-#end
-    </sql>
-    <select id="selectCount" resultType="java.lang.Integer">
-        select count(1) from
-        <include refid="TableName"/>
-        where 1 = 1
-        <include refid="page_select_sql" />
-    </select>
-    <select id="selectPage" resultMap="BaseResultMap">
-        select
-        <include refid="BaseColumnList"/>
-        from
-        <include refid="TableName"/>
-        where 1 = 1
-        <include refid="page_select_sql" />
-
-        <if test="pageable.sort != null">
-            order by
-            <foreach collection="pageable.sort" item="order" separator=",">
-                <if test="
-#foreach($column in $model.table.columns)
-                #if(!$foreach.first)||#end order.property == '${column.name}'
-#end
-                ">
-                    ${order.property} ${order.direction}
-                </if>
-            </foreach>
-        </if>
-        <if test="pageable.offset >= 0 and pageable.pageSize > 0">
-            limit ${pageable.offset}, ${pageable.pageSize}
-        </if>
-    </select>
 </mapper>
